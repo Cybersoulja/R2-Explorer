@@ -1,6 +1,6 @@
 {
 	"name": "r2-explorer",
-	"version": "1.1.14",
+	"version": "1.1.16",
 	"description": "A Google Drive Interface for your Cloudflare R2 Buckets",
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
@@ -8,14 +8,17 @@
 	"files": [
 		"dashboard",
 		"dist",
+		"docs",
+		"CHANGELOG.md",
 		"LICENSE",
 		"README.md"
 	],
 	"scripts": {
-		"build": "tsup src/index.ts --format cjs,esm --dts && cp -R ../dashboard/dist/spa/ dashboard/ && cp ../../README.md . && cp ../../LICENSE .",
+		"build": "tsup src/index.ts --format cjs,esm --dts && cp -R ../dashboard/dist/spa/ dashboard/ && cp ../../README.md . && cp ../../LICENSE . && mkdir -p docs/getting-started docs/guides && cp ../docs/index.md docs/ && cp ../docs/getting-started/*.md docs/getting-started/ && cp ../docs/guides/*.md docs/guides/",
 		"lint": "npx @biomejs/biome check src/ tests/ || (npx @biomejs/biome check --write src/ tests/; exit 1)",
 		"test": "tsc && npx vitest run --config tests/vitest.config.mts",
 		"package": "npm run build && npm pack",
+		"publint": "publint",
 		"publish-npm": "npm publish"
 	},
 	"publishConfig": {
@@ -57,6 +60,7 @@
 		"@types/node": "^24.10.1",
 		"@vitest/coverage-istanbul": "^3.2.4",
 		"hono": "^4.10.7",
+		"publint": "^0.3.17",
 		"tsup": "^8.5.1",
 		"typescript": "^5.9.3",
 		"vitest": "^3.2.4",

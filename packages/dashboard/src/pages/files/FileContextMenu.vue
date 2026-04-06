@@ -9,6 +9,9 @@
     <q-item clickable v-close-popup @click="renameObject" v-if="prop.row.type === 'file'">
       <q-item-section>Rename</q-item-section>
     </q-item>
+    <q-item clickable v-close-popup @click="duplicateObject">
+      <q-item-section>Duplicate</q-item-section>
+    </q-item>
     <q-item clickable v-close-popup @click="updateMetadataObject" v-if="prop.row.type === 'file'">
       <q-item-section>Update Metadata</q-item-section>
     </q-item>
@@ -39,7 +42,7 @@
 </template>
 <script>
 import { useQuasar } from "quasar";
-import { ROOT_FOLDER, decode, encode } from "src/appUtils";
+import { ROOT_FOLDER, apiHandler, decode, encode } from "src/appUtils";
 import { useMainStore } from "stores/main-store";
 
 export default {
@@ -70,6 +73,9 @@ export default {
 	methods: {
 		renameObject: function () {
 			this.$emit("renameObject", this.prop.row);
+		},
+		duplicateObject: function () {
+			this.$emit("duplicateObject", this.prop.row);
 		},
 		updateMetadataObject: function () {
 			this.$emit("updateMetadataObject", this.prop.row);
@@ -144,15 +150,30 @@ export default {
 				});
 			}
 		},
-		downloadObject: function () {
-			const link = document.createElement("a");
-			link.download = this.prop.row.name;
+		downloadObject: async function () {
+			try {
+				const response = await apiHandler.downloadFile(
+					this.selectedBucket,
+					this.prop.row.key,
+					{ downloadType: "objectUrl" },
+				);
 
-			link.href = `${this.mainStore.serverUrl}/api/buckets/${this.selectedBucket}/${encode(this.prop.row.key)}`;
-
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
+				const blob = new Blob([response.data]);
+				const url = URL.createObjectURL(blob);
+				const link = document.createElement("a");
+				link.download = this.prop.row.name;
+				link.href = url;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				URL.revokeObjectURL(url);
+			} catch (err) {
+				this.q.notify({
+					message: `Download failed: ${err.message || err}`,
+					timeout: 5000,
+					type: "negative",
+				});
+			}
 		},
 	},
 	setup() {
