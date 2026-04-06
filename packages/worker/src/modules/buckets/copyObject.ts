@@ -39,10 +39,25 @@ export class CopyObject extends OpenAPIRoute {
 			});
 		}
 
-		const sourceKey = decodeURIComponent(escape(atob(data.body.sourceKey)));
-		const destinationKey = decodeURIComponent(
-			escape(atob(data.body.destinationKey)),
-		);
+		let sourceKey: string;
+		try {
+			sourceKey = decodeURIComponent(escape(atob(data.body.sourceKey)));
+		} catch {
+			throw new HTTPException(400, {
+				message: "Invalid sourceKey: expected base64-encoded key",
+			});
+		}
+
+		let destinationKey: string;
+		try {
+			destinationKey = decodeURIComponent(
+				escape(atob(data.body.destinationKey)),
+			);
+		} catch {
+			throw new HTTPException(400, {
+				message: "Invalid destinationKey: expected base64-encoded key",
+			});
+		}
 
 		const object = await bucket.get(sourceKey);
 
@@ -52,11 +67,11 @@ export class CopyObject extends OpenAPIRoute {
 			});
 		}
 
-		const resp = await bucket.put(destinationKey, object.body, {
+		await bucket.put(destinationKey, object.body, {
 			customMetadata: object.customMetadata,
 			httpMetadata: object.httpMetadata,
 		});
 
-		return resp;
+		return c.json({ success: true });
 	}
 }
