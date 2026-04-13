@@ -5,7 +5,7 @@ const BUCKET = "MY_BUCKET";
 
 /** Base64-encode a key the same way the dashboard does. */
 function encodeKey(key: string): string {
-	return btoa(unescape(encodeURIComponent(key)));
+	return Buffer.from(key, "utf8").toString("base64");
 }
 
 /**
@@ -114,8 +114,8 @@ export async function seedEmail(
 	};
 
 	const encodedKey = encodeKey(key);
-	const encodedMeta = btoa(
-		unescape(encodeURIComponent(JSON.stringify(customMeta))),
+	const encodedMeta = Buffer.from(JSON.stringify(customMeta), "utf8").toString(
+		"base64",
 	);
 
 	const resp = await request.post(

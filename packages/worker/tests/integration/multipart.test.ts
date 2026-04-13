@@ -108,6 +108,26 @@ describe("Multipart Upload Endpoints", () => {
 			expect(response.status).toBe(400);
 		});
 
+		it("should return 400 for non-base64 httpMetadata", async () => {
+			if (!MY_TEST_BUCKET_1)
+				throw new Error("MY_TEST_BUCKET_1 not available");
+
+			const objectKey = "bad-http-metadata-nonbase64.dat";
+			const base64ObjectKey = btoa(objectKey);
+
+			const request = createTestRequest(
+				`/api/buckets/${BUCKET_NAME}/multipart/create?key=${encodeURIComponent(base64ObjectKey)}&httpMetadata=${encodeURIComponent("not-base64-http-metadata!!!")}`,
+				"POST",
+				undefined,
+				{ "Content-Type": "application/json" },
+			);
+
+			const response = await app.fetch(request, env, createExecutionContext());
+			expect(response.status).toBe(400);
+			const body = await response.text();
+			expect(body).toContain("Invalid httpMetadata");
+		});
+
 		it("should return 400 for malformed customMetadata", async () => {
 			if (!MY_TEST_BUCKET_1)
 				throw new Error("MY_TEST_BUCKET_1 not available");

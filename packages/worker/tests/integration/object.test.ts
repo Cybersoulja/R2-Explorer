@@ -177,6 +177,52 @@ describe("Object Specific Endpoints", () => {
 			expect(body).toContain("Bucket binding not found: NON_EXISTENT_BUCKET");
 		});
 
+		it("should return sanitized Content-Disposition for non-ASCII and quote-containing filenames", async () => {
+			const SPECIAL_KEY = 'file-ä".txt';
+			const SPECIAL_CONTENT = "special content";
+			const SPECIAL_CONTENT_TYPE = "text/plain";
+
+			await MY_TEST_BUCKET_1.put(SPECIAL_KEY, SPECIAL_CONTENT, {
+				httpMetadata: { contentType: SPECIAL_CONTENT_TYPE },
+			});
+
+			const base64Key = Buffer.from(SPECIAL_KEY, "utf8").toString("base64");
+			const request = createTestRequest(
+				`/api/buckets/${BUCKET_NAME}/${base64Key}`,
+				"GET",
+			);
+			const response = await app.fetch(request, env, createExecutionContext());
+
+			expect(response.status).toBe(200);
+			expect(response.headers.get("content-type")).toBe(SPECIAL_CONTENT_TYPE);
+
+			const contentDisposition = response.headers.get("content-disposition");
+			expect(contentDisposition).not.toBeNull();
+
+			// Extract filename and filename* parts
+			const filenameMatch = contentDisposition!.match(/filename="([^"]+)"/);
+			const filenameStarMatch = contentDisposition!.match(/filename\*=UTF-8''(.+)$/);
+
+			expect(filenameMatch).not.toBeNull();
+			expect(filenameStarMatch).not.toBeNull();
+
+			const sanitizedFilename = filenameMatch![1];
+			const encodedFilenameStar = filenameStarMatch![1];
+
+			// filename must not contain non-ASCII or double-quote characters
+			expect(sanitizedFilename).not.toContain("ä");
+			expect(sanitizedFilename).not.toContain('"');
+			// Should still resemble the original name
+			expect(sanitizedFilename).toContain("file");
+			expect(sanitizedFilename).toContain(".txt");
+
+			// filename* must preserve the original key via RFC 5987 UTF-8 encoding
+			expect(decodeURIComponent(encodedFilenameStar)).toBe(SPECIAL_KEY);
+
+			const body = await response.text();
+			expect(body).toBe(SPECIAL_CONTENT);
+		});
+
 		// Basic Range request test - R2 supports this automatically
 		it.skip("should handle a basic HTTP Range request", async () => {
 			const base64Key = btoa(TEST_OBJECT_KEY);

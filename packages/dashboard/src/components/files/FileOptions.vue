@@ -161,27 +161,43 @@ export default defineComponent({
 
 				await apiHandler.createFolder(destPrefix, this.selectedBucket);
 
+				let failed = false;
 				for (const [i, innerFile] of folderContents.entries()) {
 					if (innerFile.key && !innerFile.key.endsWith("/")) {
 						const newKey = innerFile.key.replace(sourcePrefix, destPrefix);
-						await apiHandler.copyObject(
-							this.selectedBucket,
-							innerFile.key,
-							newKey,
-						);
+						try {
+							await apiHandler.copyObject(
+								this.selectedBucket,
+								innerFile.key,
+								newKey,
+							);
+						} catch (err) {
+							failed = true;
+							notif({
+								icon: "error",
+								spinner: false,
+								color: "negative",
+								caption: `Failed on: ${innerFile.key}`,
+								message: "Folder duplication failed",
+								timeout: 4000,
+							});
+							break;
+						}
 					}
 					notif({
 						caption: `${Number.parseInt((i * 100) / folderContents.length)}%`,
 					});
 				}
 
-				notif({
-					icon: "done",
-					spinner: false,
-					caption: "100%",
-					message: "Folder duplicated!",
-					timeout: 2500,
-				});
+				if (!failed) {
+					notif({
+						icon: "done",
+						spinner: false,
+						caption: "100%",
+						message: "Folder duplicated!",
+						timeout: 2500,
+					});
+				}
 			} else {
 				const destKey = this.generateCopyName(row.key, false);
 				await apiHandler.copyObject(this.selectedBucket, row.key, destKey);
