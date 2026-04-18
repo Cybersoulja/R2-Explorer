@@ -9,3 +9,8 @@ binding = 'teste'
 bucket_name = 'teste'
 preview_bucket_name = 'teste'
 
+# [[secrets_store_secrets]]
+# binding = "MY_SECRET"
+# secret_name = "my-secret-name"
+# store_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+

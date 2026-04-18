@@ -22,6 +22,7 @@ export default defineWorkersConfig({
 					},
 					bindings: {
 						NON_R2_BINDING: { type: "var", value: "some_value" }, // For testing non-bucket bindings
+						MY_SECRET: { type: "var", value: "mock-secret-value" }, // Mock SecretsStoreSecret binding
 						// Add other global bindings if needed by the worker, e.g., KV or D1
 						// EMAIL_SENDER: { type: "send_email", ... } // if using abstract senders for emails
 					},
