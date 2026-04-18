@@ -38,7 +38,7 @@ export type ShareMetadata = {
 
 export type AppEnv = {
 	ASSETS: Fetcher;
-	[key: string]: R2Bucket | SecretsStoreSecret | Fetcher;
+[key: string]: R2Bucket | SecretsStoreSecret | Fetcher | string;
 };
 export type AppVariables = {
 	config: R2ExplorerConfig;
