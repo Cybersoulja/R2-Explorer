@@ -8,3 +8,10 @@ assets = { directory = "node_modules/r2-explorer/dashboard", binding = "ASSETS",
 [[r2_buckets]]
 binding = "BUCKET"
 bucket_name = "bucket"
+
+# Bind Cloudflare Secrets Store secrets to your worker (optional).
+# Docs: https://developers.cloudflare.com/workers/runtime-apis/bindings/secrets-store/
+# [[secrets_store_secrets]]
+# binding = "MY_SECRET"
+# secret_name = "my-secret-name"
+# store_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

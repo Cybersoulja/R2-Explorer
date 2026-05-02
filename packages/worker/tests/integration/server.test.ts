@@ -36,6 +36,7 @@ describe("Server Endpoints", () => {
 		expect(body.buckets).not.toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({ name: "NON_R2_BINDING" }),
+				expect.objectContaining({ name: "MY_SECRET" }),
 			]),
 		);
 		// Check for at least the expected buckets (test environment may create additional ones)
